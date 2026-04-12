@@ -154,22 +154,22 @@ def metrics(df,cols):
     for col in cols["dt"][:1]:
         df["_m"]=df[col].dt.to_period("M").astype(str)
         mt=df.groupby("_m").size().reset_index(name="Count"); mt.columns=["Month","Count"]
-        ch["trend"]={"t":"line","d":mt.to_dict("r"),"x":"Month","y":"Count","title":"Monthly Trend"}
+        ch["trend"]={"t":"line","d":mt.to_dict("records"),"x":"Month","y":"Count","title":"Monthly Trend"}
         m["range"]=f"{df[col].min().strftime('%d %b %Y')} – {df[col].max().strftime('%d %b %Y')}"
         for nc in cols["num"][:2]:
             mr=df.groupby("_m")[nc].sum().reset_index(); mr.columns=["Month",nc]
-            ch[f"mt_{nc}"]={"t":"line","d":mr.to_dict("r"),"x":"Month","y":nc,"title":f"Monthly {nc.replace('_',' ').title()}"}
+            ch[f"mt_{nc}"]={"t":"line","d":mr.to_dict("records"),"x":"Month","y":nc,"title":f"Monthly {nc.replace('_',' ').title()}"}
     for col in cols["cat"]:
         l=col.replace("_"," ").title(); vc=df[col].value_counts()
         m[f"{col}_top"]=str(vc.idxmax()); m[f"{col}_u"]=len(vc)
         cd=vc.reset_index(); cd.columns=[l,"Count"]
         if len(vc)<=7: ch[f"p_{col}"]={"t":"pie","d":cd.to_dict("records"),"n":l,"v":"Count","title":f"{l} Split"}
-        else: ch[f"b_{col}"]={"t":"bar","d":cd.head(10).to_dict("r"),"x":"Count","y":l,"title":f"Top {l}"}
+        else: ch[f"b_{col}"]={"t":"bar","d":cd.head(10).to_dict("records"),"x":"Count","y":l,"title":f"Top {l}"}
         for nc in cols["num"][:1]:
             if len(vc)<=15:
                 ag=df.groupby(col)[nc].sum().sort_values(ascending=False).head(10)
                 ad=ag.reset_index(); ad.columns=[l,nc.replace("_"," ").title()]
-                ch[f"c_{col}_{nc}"]={"t":"bar","d":ad.to_dict("r"),"x":nc.replace("_"," ").title(),"y":l,"title":f"{nc.replace('_',' ').title()} by {l}"}
+                ch[f"c_{col}_{nc}"]={"t":"bar","d":ad.to_dict("records"),"x":nc.replace("_"," ").title(),"y":l,"title":f"{nc.replace('_',' ').title()} by {l}"}
     if len(cols["num"])>=2: ch["sc"]={"t":"sc","x":cols["num"][0],"y":cols["num"][1],"title":f"{cols['num'][0]} vs {cols['num'][1]}"}
     return m,ch
 
