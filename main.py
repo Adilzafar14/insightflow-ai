@@ -163,7 +163,7 @@ def metrics(df,cols):
         l=col.replace("_"," ").title(); vc=df[col].value_counts()
         m[f"{col}_top"]=str(vc.idxmax()); m[f"{col}_u"]=len(vc)
         cd=vc.reset_index(); cd.columns=[l,"Count"]
-        if len(vc)<=7: ch[f"p_{col}"]={"t":"pie","d":cd.to_dict("r"),"n":l,"v":"Count","title":f"{l} Split"}
+        if len(vc)<=7: ch[f"p_{col}"]={"t":"pie","d":cd.to_dict("records"),"n":l,"v":"Count","title":f"{l} Split"}
         else: ch[f"b_{col}"]={"t":"bar","d":cd.head(10).to_dict("r"),"x":"Count","y":l,"title":f"Top {l}"}
         for nc in cols["num"][:1]:
             if len(vc)<=15:
