@@ -122,16 +122,30 @@ def lo():
 # SMART INDUSTRY DETECTOR
 # ══════════════════════════
 def detect_industry(df):
-    cols=[c.lower() for c in df.columns]
-    col_str=" ".join(cols)
-    if any(w in col_str for w in ["patient","admission","discharge","diagnosis","treatment_cost","disease"]):
+    # Check both original and lowercase column names
+    cols_lower = [c.lower() for c in df.columns]
+    col_str = " ".join(cols_lower)
+    
+    # Hospital keywords
+    hosp_kw = ["patient","admission","discharge","diagnosis","treatment_cost","treatment","disease","doctor","ward"]
+    if any(w in col_str for w in hosp_kw):
         return "hospital"
-    if any(w in col_str for w in ["shipment","delivery_date","freight","vehicle_type","warehouse","distance_km"]):
+    
+    # Logistics keywords  
+    logi_kw = ["shipment","delivery_date","freight","vehicle_type","vehicle","warehouse","distance_km","distance","shipment_cost","fuel_cost"]
+    if any(w in col_str for w in logi_kw):
         return "logistics"
-    if any(w in col_str for w in ["product_price","order_date","order_status","payment_mode","discount","quantity"]):
+    
+    # Ecommerce keywords
+    ecom_kw = ["product_price","order_date","order_status","order_id","payment_mode","discount","quantity","product","cart"]
+    if any(w in col_str for w in ecom_kw):
         return "ecommerce"
-    if any(w in col_str for w in ["student","attendance","cgpa","marks","course","enrollment","placement","semester","backlog"]):
+    
+    # Education keywords
+    edu_kw = ["student","attendance","cgpa","marks","course","enrollment","placement","semester","backlog","fees_paid","hostel"]
+    if any(w in col_str for w in edu_kw):
         return "education"
+    
     return "generic"
 
 # ══════════════════════════
