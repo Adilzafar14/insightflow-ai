@@ -502,7 +502,7 @@ def pg_upload():
             st.markdown(f'<div style="background:#161B22;border:1px solid #21262D;border-left:3px solid {color};border-radius:8px;padding:0.7rem 1rem;margin:0.3rem 0;"><b style="color:#E6EDF3;">{icon} {name}</b><div style="font-size:0.72rem;color:#6E7681;margin-top:2px;">{hint}</div></div>',unsafe_allow_html=True)
 
 def pg_dashboard():
-    if not st.session_state.get("df"):
+    if st.session_state.get("df") is None:
         st.markdown('<div style="text-align:center;padding:4rem;color:#8B949E;"><div style="font-size:3rem;">📂</div><div style="font-size:1.1rem;margin-top:1rem;color:#E6EDF3;">Koi data nahi mila</div><div style="margin-top:0.5rem;">Pehle data upload karo</div></div>',unsafe_allow_html=True)
         if st.button("→ Upload Karo",type="primary"): st.session_state["page"]="upload"; st.rerun()
         return
