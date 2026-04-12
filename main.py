@@ -602,7 +602,8 @@ def pg_login():
 def sidebar():
     u=gu(); rc="#F85149" if ia() else "#58A6FF"
     with st.sidebar:
-        st.markdown(f'<div style="padding:1rem;background:#0D1117;border-radius:10px;margin-bottom:1rem;border:1px solid #21262D;"><div style="font-size:0.65rem;color:#6E7681;font-weight:600;letter-spacing:1px;">LOGGED IN</div><div style="font-size:0.95rem;font-weight:700;color:#E6EDF3;margin-top:4px;">{u["name"]}</div><span style="font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:6px;background:{rc}22;color:{rc};">{u["role"].upper()}</span>{"<div style=font-size:0.75rem;color:#6E7681;margin-top:4px;>"+str(u.get('cn') or '')+"</div>" if u.get("cn") else ""}</div>',unsafe_allow_html=True)
+        client_div = f"<div style='font-size:0.75rem;color:#6E7681;margin-top:4px;'>{str(u.get('cn') or '')}</div>" if u.get("cn") else ""
+        st.markdown(f'<div style="padding:1rem;background:#0D1117;border-radius:10px;margin-bottom:1rem;border:1px solid #21262D;"><div style="font-size:0.65rem;color:#6E7681;font-weight:600;letter-spacing:1px;">LOGGED IN</div><div style="font-size:0.95rem;font-weight:700;color:#E6EDF3;margin-top:4px;">{u["name"]}</div><span style="font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:6px;background:{rc}22;color:{rc};">{u["role"].upper()}</span>{client_div}</div>',unsafe_allow_html=True)
         pages={"upload":"📁  Upload & Analyze","clients":"👥  Clients","users":"🔐  Users","festival":"🎉  Festivals"} if ia() else {"dashboard":"📈  Dashboard"}
         if ic() and st.session_state.get("df") is None: pages={"upload":"📁  Upload Data",**pages}
         for pk,pl in pages.items():
