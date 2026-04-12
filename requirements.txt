@@ -1,9 +1,8 @@
-streamlit==1.32.0
-pandas==2.2.1
-numpy==1.26.4
-plotly==5.20.0
-openpyxl==3.1.2
-xlsxwriter==3.1.9
-anthropic==0.21.3
-python-dotenv==1.0.1
-Pillow==10.3.0
+streamlit
+pandas
+numpy
+plotly
+openpyxl
+xlsxwriter
+anthropic
+python-dotenv
