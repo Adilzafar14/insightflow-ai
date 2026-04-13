@@ -12,7 +12,6 @@ from pipeline import detect_industry, clean_data, process_hospital, process_ecom
 from dashboard import COLORS, DARK_LAYOUT, render_chart, render_multivariate
 from portal import page_entry
 from reports import generate_pdf_report
-from chatbot import page_chatbot
 
 st.set_page_config(
     page_title="InsightFlow AI",
@@ -272,7 +271,7 @@ def render_sidebar():
             pages = {"upload": "📁  Upload & Analyze", "entry": "✏️  Data Entry", "clients": "👥  Clients", "users": "🔐  Users", "festival": "🎉  Festivals"}
         else:
             if st.session_state.get("df") is not None:
-                pages = {"dashboard": "📈  My Dashboard", "entry": "✏️  Data Entry", "chatbot": "🤖  AI Chatbot"}
+                pages = {"dashboard": "📈  My Dashboard", "entry": "✏️  Data Entry"}
             else:
                 pages = {"upload": "📁  Upload Data", "entry": "✏️  Data Entry"}
             # Auto redirect client to dashboard if data loaded
@@ -862,7 +861,6 @@ elif page == "dashboard": page_dashboard()
 elif page == "entry":     page_entry()
 elif page == "clients":   page_clients()
 elif page == "users":     page_users()
-elif page == "chatbot":   page_chatbot()
 elif page == "festival":  page_festival()
 else:                     page_upload()
 
@@ -892,6 +890,5 @@ elif page == "dashboard": page_dashboard()
 elif page == "entry":     page_entry()
 elif page == "clients":   page_clients()
 elif page == "users":     page_users()
-elif page == "chatbot":   page_chatbot()
 elif page == "festival":  page_festival()
 else:                     page_upload()
