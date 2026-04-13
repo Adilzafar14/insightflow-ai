@@ -7,7 +7,7 @@ from datetime import datetime
 
 from auth import (init_db, is_logged_in, get_user, is_admin, is_client,
                   set_session, do_logout, login, create_user, get_clients,
-                  get_users, add_client, upw, toggle_user, get_db)
+                  get_users, add_client, upw, toggle_user)
 from pipeline import detect_industry, clean_data, process_hospital, process_ecommerce, process_logistics, process_education, process_generic
 from dashboard import COLORS, DARK_LAYOUT, render_chart, render_multivariate
 from portal import page_entry
@@ -273,6 +273,9 @@ def render_sidebar():
                 pages = {"dashboard": "📈  My Dashboard", "entry": "✏️  Data Entry"}
             else:
                 pages = {"upload": "📁  Upload Data", "entry": "✏️  Data Entry"}
+            # Auto redirect client to dashboard if data loaded
+            if st.session_state.get("df") is not None and st.session_state.get("page") == "upload":
+                st.session_state["page"] = "dashboard"
 
         for i, (pk, pl) in enumerate(pages.items()):
             t = "primary" if st.session_state.get("page") == pk else "secondary"
@@ -355,6 +358,8 @@ def page_upload():
 
                 # If client, force their industry
                 if client_industry:
+                    if industry != client_industry:
+                        st.warning(f"⚠️ Wrong data! Aapko sirf {client_industry.title()} data upload karna chahiye. Analysis {client_industry.title()} mode mein hoga.")
                     industry = client_industry
 
                 if industry == "hospital":   kpis, charts, insights = process_hospital(df)
@@ -856,3 +861,10 @@ if is_client() and page in ("clients", "users", "festival"):
     page = "dashboard"
     st.session_state["page"] = page
 
+if   page == "upload":    page_upload()
+elif page == "dashboard": page_dashboard()
+elif page == "entry":     page_entry()
+elif page == "clients":   page_clients()
+elif page == "users":     page_users()
+elif page == "festival":  page_festival()
+else:                     page_upload()
