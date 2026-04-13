@@ -192,3 +192,13 @@ def page_entry():
 
                 csv = df_e.to_csv(index=False).encode()
                 st.download_button("Download CSV", csv, f"{client_name}_entries.csv", "text/csv")
+                st.markdown("---")
+                st.markdown("**🗑️ Entry Delete Karo:**")
+                del_id = st.number_input("Entry ID", min_value=1, step=1, key="del_id")
+                if st.button("Delete", key="btn_del", type="secondary"):
+                    c = get_db()
+                    c.execute("DELETE FROM entries WHERE id=? AND client_id=?", (int(del_id), client_id))
+                    c.commit()
+                    c.close()
+                    st.success("Deleted!")
+                    st.rerun()
