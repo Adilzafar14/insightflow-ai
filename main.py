@@ -693,10 +693,12 @@ def page_clients():
             st.caption(c.get("email") or "—")
         with c3:
             if st.button("Load", key=f"load_{c['id']}", use_container_width=True):
-                if st.button("🗑️", key=f"del_{c['id']}", help="Delete", type="secondary"):
-                 db = get_db()
-    db.execute("UPDATE clients SET is_active=0 WHERE id=?", (c["id"],))
-    db.commit(); db.close()
+             if st.button("🗑️", key=f"del_{c['id']}", help="Delete", type="secondary"):
+    _cid = int(c['id'])
+    _db = get_db()
+    _db.execute("UPDATE clients SET is_active=0 WHERE id=?", (_cid,))
+    _db.commit()
+    _db.close()
     st.rerun()
     st.session_state["ac"] = c
     st.session_state["page"] = "upload"
@@ -865,4 +867,5 @@ page = st.session_state.get("page", "upload")
 if is_client() and page in ("clients", "users", "festival"):
     page = "dashboard"
     st.session_state["page"] = page
+
 
