@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime
-from auth import get_user, is_admin, is_client, get_db, save_entry, get_entries
+from auth import get_user, is_admin, is_client, get_db, save_entry, get_entries, get_clients
 
 def entries_to_df(entries, industry):
     if not entries: return None
