@@ -668,46 +668,42 @@ def page_dashboard():
 
 
 def page_clients():
-    st.markdown('<div class="hero"><div class="hero-badge">👥 Management</div><div class="hero-title">Client Management</div><div class="hero-sub">Add and manage Lucknow clients</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero"><div class="hero-badge">👥 Management</div><div class="hero-title">Client Management</div><div class="hero-sub">Add and manage clients</div></div>', unsafe_allow_html=True)
 
     with st.expander("➕ Add New Client"):
         with st.form("frm_add_client"):
-            c1, c2 = st.columns(2)
-            with c1:
+            r1c1, r1c2 = st.columns(2)
+            with r1c1:
                 nm  = st.text_input("Client Name *")
                 ind = st.selectbox("Industry", ["hospital", "ecommerce", "logistics", "education", "other"])
-            with c2:
+            with r1c2:
                 em   = st.text_input("Email")
-                city = st.selectbox("Lucknow Area", ["Hazratganj", "Gomtinagar", "Alambagh", "Chowk", "Aliganj", "Indira Nagar", "Rajajipuram", "Chinhat", "Other"])
-            if st.form_submit_button("✅ Add Client", use_container_width=True) and nm:
-                cid = add_client(nm, ind, em, city)
-                st.success(f"✅ '{nm}' added! ID: {cid}")
+                city = st.selectbox("Area", ["Hazratganj", "Gomtinagar", "Alambagh", "Chowk", "Aliganj", "Indira Nagar", "Other"])
+            if st.form_submit_button("Add Client", use_container_width=True) and nm:
+                add_client(nm, ind, em, city)
+                st.success(f"Added!")
                 st.rerun()
 
-    icons = {"hospital": "🏥", "ecommerce": "🛒", "logistics": "🚚", "education": "🎓", "other": "📊"}
-    for c in get_clients():
-        c1, c2, c3 = st.columns([4, 3, 1])
-        with c1:
-            st.markdown(f'<div style="color:#E6EDF3; font-weight:600;">{icons.get(c["industry"],"📊")} {c["name"]}</div><div style="font-size:0.78rem; color:#6E7681;">📍 {c.get("city","Lucknow")} · {c["industry"]}</div>', unsafe_allow_html=True)
-        with c2:
-            st.caption(c.get("email") or "—")
-        with c3:
-            with col3:
-             if st.button("Load", key=f"load_{c['id']}", use_container_width=True):
-                st.session_state["ac"] = c
+    icons = {"hospital": "Hospital", "ecommerce": "Shop", "logistics": "Logistics", "education": "College", "other": "Other"}
+    for cl in get_clients():
+        ra, rb, rc, rd = st.columns([4, 3, 1, 1])
+        with ra:
+            st.markdown(f'<div style="color:#E6EDF3;font-weight:600;">{cl["name"]}</div><div style="font-size:0.78rem;color:#6E7681;">{cl.get("city","Lucknow")} · {cl["industry"]}</div>', unsafe_allow_html=True)
+        with rb:
+            st.caption(cl.get("email") or "—")
+        with rc:
+            if st.button("Load", key=f"ld_{cl['id']}", use_container_width=True):
+                st.session_state["ac"] = cl
                 st.session_state["page"] = "upload"
                 st.rerun()
-            if st.button("🗑️", key=f"del_{c['id']}", help="Delete"):
-                _cid = int(c['id'])
-                _db = get_db()
-                _db.execute("UPDATE clients SET is_active=0 WHERE id=?", (_cid,))
-                _db.commit()
-                _db.close()
+        with rd:
+            if st.button("Del", key=f"dl_{cl['id']}", help="Delete"):
+                xdb = get_db()
+                xdb.execute("UPDATE clients SET is_active=0 WHERE id=?", (cl["id"],))
+                xdb.commit()
+                xdb.close()
                 st.rerun()
-    st.session_state["page"] = "upload"
-    st.rerun()
-    st.markdown('<hr style="border-color:#21262D; margin:0.4rem 0;">', unsafe_allow_html=True)
-
+        st.markdown('<hr style="border-color:#21262D;margin:0.3rem 0;">', unsafe_allow_html=True)
 
 def page_users():
     st.markdown('<div class="hero"><div class="hero-badge">🔐 Access Control</div><div class="hero-title">User Management</div><div class="hero-sub">Create and manage user accounts</div></div>', unsafe_allow_html=True)
@@ -871,4 +867,10 @@ if is_client() and page in ("clients", "users", "festival"):
     page = "dashboard"
     st.session_state["page"] = page
 
-
+if   page == "upload":    page_upload()
+elif page == "dashboard": page_dashboard()
+elif page == "entry":     page_entry()
+elif page == "clients":   page_clients()
+elif page == "users":     page_users()
+elif page == "festival":  page_festival()
+else:                     page_upload()
