@@ -144,7 +144,10 @@ def page_entry():
         st.warning("Client select karo.")
         return
 
-    industry = client.get("industry", "generic")
+    industry = str(client.get("industry", "generic")).lower().strip()
+    # Normalize industry names
+    if industry not in ("hospital", "ecommerce", "logistics", "education"):
+        industry = "generic"
     client_id = client["id"]
     client_name = client["name"]
 
