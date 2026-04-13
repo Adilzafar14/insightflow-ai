@@ -22,22 +22,9 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 *, html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 
-/* Hide sidebar collapse button & keyboard icon */
-[data-testid="collapsedControl"] { display: none !important; visibility: hidden !important; }
-[data-testid="stSidebarCollapsedControl"] { display: none !important; }
-button[data-testid="baseButton-headerNoPadding"] { display: none !important; }
-.st-emotion-cache-1dp5vir { display: none !important; }
+/* Hide keyboard double arrow icon */
 span[data-testid="stIconMaterial"] { display: none !important; }
-
-/* Fix sidebar width - no sliding */
-[data-testid="stSidebar"] { 
-    min-width: 260px !important; 
-    max-width: 260px !important;
-    position: fixed !important;
-}
-[data-testid="stSidebar"] > div:first-child { 
-    width: 260px !important;
-}
+[data-testid="collapsedControl"] { display: none !important; }
 
 /* App background */
 [data-testid="stAppViewContainer"] { background: #0A0F1E; }
