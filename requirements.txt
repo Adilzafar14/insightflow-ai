@@ -6,3 +6,5 @@ openpyxl
 xlsxwriter
 anthropic
 python-dotenv
+reportlab
+kaleido
