@@ -327,7 +327,7 @@ def set_session(u): st.session_state[KEY] = u
 def do_logout():
     st.session_state[KEY] = None
     for k in ["df", "result", "page", "ac", "ai_insight"]:
-        st.session_state.pop(k, None)
+        st.session_state.pop(k)
 
 # ══════════════════════════════════════════════════════════════════
 # INDUSTRY DETECTION - Strict & Accurate
@@ -888,8 +888,7 @@ def render_chart(chart_def, df, height=300):
             sample = df.sample(min(500, len(df)), random_state=42)
             fig = px.scatter(sample, x=x_col, y=y_col, color=c_col,
                              color_discrete_sequence=COLORS, opacity=0.65,
-                             title=chart_def.get("title", ""),
-                             trendline="ols" if c_col is None else None)
+                             title=chart_def.get("title", ""))
             fig.update_layout(**L)
             if c_col:
                 fig.update_layout(legend=dict(orientation="h", y=-0.25, font=dict(color="#8B949E")))
@@ -1332,8 +1331,7 @@ def page_dashboard():
             sample = df.sample(min(500, len(df)), random_state=42)
             fig = px.scatter(sample, x=x, y=y,
                              color=color if color != "None" else None,
-                             color_discrete_sequence=COLORS, opacity=0.7,
-                             trendline="ols" if color == "None" else None)
+                             color_discrete_sequence=COLORS, opacity=0.7)
             fig.update_layout(plot_bgcolor="#161B22", paper_bgcolor="#161B22",
                               font=dict(color="#8B949E"), height=400,
                               margin=dict(l=10, r=10, t=40, b=10),
