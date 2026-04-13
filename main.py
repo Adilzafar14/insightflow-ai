@@ -7,10 +7,11 @@ from datetime import datetime
 
 from auth import (init_db, is_logged_in, get_user, is_admin, is_client,
                   set_session, do_logout, login, create_user, get_clients,
-                  get_users, add_client, upw, toggle_user, get_db)
+                  get_users, add_client, upw, toggle_user)
 from pipeline import detect_industry, clean_data, process_hospital, process_ecommerce, process_logistics, process_education, process_generic
 from dashboard import COLORS, DARK_LAYOUT, render_chart, render_multivariate
 from portal import page_entry
+from reports import generate_pdf_report
 
 st.set_page_config(
     page_title="InsightFlow AI",
@@ -666,6 +667,23 @@ def page_dashboard():
             except:
                 pass
 
+        st.markdown('<div class="section-title">📄 PDF REPORT</div>', unsafe_allow_html=True)
+        if st.button("📄 Generate PDF Report", type="primary", use_container_width=True, key="btn_pdf"):
+            with st.spinner("PDF ban raha hai..."):
+                pdf = generate_pdf_report(cn, industry, kpis, insights, df)
+                if pdf:
+                    st.download_button(
+                        "⬇️ Download PDF Report",
+                        pdf,
+                        f"{cn}_InsightFlow_Report_{datetime.now().strftime('%Y%m%d')}.pdf",
+                        "application/pdf",
+                        use_container_width=True,
+                        key="btn_dl_pdf"
+                    )
+                    st.success("✅ PDF ready!")
+                else:
+                    st.error("PDF generate nahi hua.")
+
 
 def page_clients():
     st.markdown('<div class="hero"><div class="hero-badge">👥 Management</div><div class="hero-title">Client Management</div><div class="hero-sub">Add and manage clients</div></div>', unsafe_allow_html=True)
@@ -867,5 +885,10 @@ if is_client() and page in ("clients", "users", "festival"):
     page = "dashboard"
     st.session_state["page"] = page
 
-
-
+if   page == "upload":    page_upload()
+elif page == "dashboard": page_dashboard()
+elif page == "entry":     page_entry()
+elif page == "clients":   page_clients()
+elif page == "users":     page_users()
+elif page == "festival":  page_festival()
+else:                     page_upload()
