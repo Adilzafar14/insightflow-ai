@@ -693,10 +693,15 @@ def page_clients():
             st.caption(c.get("email") or "—")
         with c3:
             if st.button("Load", key=f"load_{c['id']}", use_container_width=True):
-                st.session_state["ac"] = c
-                st.session_state["page"] = "upload"
-                st.rerun()
-        st.markdown('<hr style="border-color:#21262D; margin:0.4rem 0;">', unsafe_allow_html=True)
+                if st.button("🗑️", key=f"del_{c['id']}", help="Delete", type="secondary"):
+                 db = get_db()
+    db.execute("UPDATE clients SET is_active=0 WHERE id=?", (c["id"],))
+    db.commit(); db.close()
+    st.rerun()
+    st.session_state["ac"] = c
+    st.session_state["page"] = "upload"
+    st.rerun()
+    st.markdown('<hr style="border-color:#21262D; margin:0.4rem 0;">', unsafe_allow_html=True)
 
 
 def page_users():
