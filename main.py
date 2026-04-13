@@ -10,6 +10,8 @@ from auth import (init_db, is_logged_in, get_user, is_admin, is_client,
                   get_users, add_client, upw, toggle_user)
 from pipeline import detect_industry, clean_data, process_hospital, process_ecommerce, process_logistics, process_education, process_generic
 from dashboard import COLORS, DARK_LAYOUT, render_chart, render_multivariate
+from reports import generate_pdf_report
+from chatbot import page_chatbot
 from portal import page_entry
 
 st.set_page_config(
@@ -842,4 +844,5 @@ page = st.session_state.get("page", "upload")
 if is_client() and page in ("clients", "users", "festival"):
     page = "dashboard"
     st.session_state["page"] = page
+
 
