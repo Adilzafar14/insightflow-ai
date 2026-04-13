@@ -836,7 +836,6 @@ if not is_logged_in():
     page_login()
     st.stop()
 
-render_sidebar()
 
 page = st.session_state.get("page", "upload")
 
