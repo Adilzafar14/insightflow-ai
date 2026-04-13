@@ -22,6 +22,14 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 *, html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 
+/* Hide sidebar collapse button */
+[data-testid="collapsedControl"] { display: none !important; }
+button[kind="header"] { display: none !important; }
+section[data-testid="stSidebar"] > div { overflow: hidden !important; }
+
+/* Fix sidebar width */
+[data-testid="stSidebar"] { min-width: 250px !important; max-width: 280px !important; }
+
 /* App background */
 [data-testid="stAppViewContainer"] { background: #0A0F1E; }
 [data-testid="stHeader"] { background: transparent; }
