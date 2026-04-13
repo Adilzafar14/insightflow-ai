@@ -22,13 +22,22 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 *, html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 
-/* Hide sidebar collapse button */
-[data-testid="collapsedControl"] { display: none !important; }
-button[kind="header"] { display: none !important; }
-section[data-testid="stSidebar"] > div { overflow: hidden !important; }
+/* Hide sidebar collapse button & keyboard icon */
+[data-testid="collapsedControl"] { display: none !important; visibility: hidden !important; }
+[data-testid="stSidebarCollapsedControl"] { display: none !important; }
+button[data-testid="baseButton-headerNoPadding"] { display: none !important; }
+.st-emotion-cache-1dp5vir { display: none !important; }
+span[data-testid="stIconMaterial"] { display: none !important; }
 
-/* Fix sidebar width */
-[data-testid="stSidebar"] { min-width: 250px !important; max-width: 280px !important; }
+/* Fix sidebar width - no sliding */
+[data-testid="stSidebar"] { 
+    min-width: 260px !important; 
+    max-width: 260px !important;
+    position: fixed !important;
+}
+[data-testid="stSidebar"] > div:first-child { 
+    width: 260px !important;
+}
 
 /* App background */
 [data-testid="stAppViewContainer"] { background: #0A0F1E; }
@@ -99,6 +108,16 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] { color: #E6EDF3 !impo
     background: #161B22;
     border: 2px dashed #30363D;
     border-radius: 12px;
+    padding: 1rem;
+}
+[data-testid="stFileUploaderDropzone"] {
+    background: #161B22 !important;
+}
+[data-testid="stFileUploader"] button {
+    background: #21262D !important;
+    border: 1px solid #30363D !important;
+    color: #E6EDF3 !important;
+    border-radius: 6px !important;
 }
 
 /* Expander */
@@ -808,6 +827,15 @@ def process_education(df):
         yv = df[year_col].value_counts()
         charts["year"] = {"type": "pie", "data": yv.reset_index().rename(columns={year_col: "Year", "count": "Students"}).to_dict("records"), "names": "Year", "values": "Students", "title": "Year-wise Students"}
 
+    # Trend by Admission Year
+    yr_col = fc("Admission_Year", "Year", "Batch")
+    if yr_col:
+        try:
+            yv = df[yr_col].value_counts().sort_index().reset_index()
+            yv.columns = ["Year", "Students"]
+            charts["yearly_trend"] = {"type": "line", "data": yv.to_dict("records"), "x": "Year", "y": "Students", "title": "Students by Admission Year"}
+        except: pass
+
     # Bivariate: CGPA vs Attendance
     if cgpa_col and att_col:
         charts["cgpa_vs_att"] = {"type": "scatter", "df_x": att_col, "df_y": cgpa_col, "color": dept_col, "title": "Attendance vs CGPA"}
@@ -1255,7 +1283,9 @@ def page_dashboard():
                 elif v >= 1e5:  fmt = f"₹{v/1e5:.1f}L"
                 elif v >= 1e3:  fmt = f"₹{v/1e3:.0f}K"
                 else:           fmt = f"₹{v:,.0f}"
-            elif any(x in k.lower() for x in ["rate", "%", "discount", "pct"]):
+            elif "low attendance" in k.lower() or "placed students" in k.lower() or "students with" in k.lower() or "count" in k.lower():
+                fmt = f"{int(v):,}"
+            elif any(x in k.lower() for x in ["rate", "%", "discount", "pct", "avg attendance", "placement rate", "scholarship", "internship", "backlog %", "hostel"]):
                 fmt = f"{v:.1f}%"
             elif "days" in k.lower() or "cgpa" in k.lower() or "lpa" in k.lower():
                 fmt = f"{v:.1f}"
