@@ -269,9 +269,10 @@ def render_sidebar():
         if is_admin():
             pages = {"upload": "📁  Upload & Analyze", "entry": "✏️  Data Entry", "clients": "👥  Clients", "users": "🔐  Users", "festival": "🎉  Festivals"}
         else:
-            pages = {"dashboard": "📈  My Dashboard", "entry": "✏️  Data Entry"}
-            if st.session_state.get("df") is None:
-                pages = {"upload": "📁  Upload Data", **pages}
+            if st.session_state.get("df") is not None:
+                pages = {"dashboard": "📈  My Dashboard", "entry": "✏️  Data Entry"}
+            else:
+                pages = {"upload": "📁  Upload Data", "entry": "✏️  Data Entry"}
 
         for i, (pk, pl) in enumerate(pages.items()):
             t = "primary" if st.session_state.get("page") == pk else "secondary"
@@ -312,11 +313,19 @@ def page_upload():
     ac = st.session_state.get("ac", {}) or {}
     cn = ac.get("name", "") or (get_user().get("cn") or "")
 
+    # Client industry restriction
+    client_industry = None
+    if is_client() and get_user().get("client_id"):
+        c = get_db()
+        cl = c.execute("SELECT industry FROM clients WHERE id=?", (get_user()["client_id"],)).fetchone()
+        c.close()
+        if cl: client_industry = cl["industry"]
+
     st.markdown(f"""
     <div class="hero">
         <div class="hero-badge">📍 Lucknow · Data Analytics</div>
         <div class="hero-title">📊 Upload & Analyze</div>
-        <div class="hero-sub">Upload any CSV or Excel — Hospital, Ecommerce, Logistics, Education, or any data{f" · {cn}" if cn else ""}</div>
+        <div class="hero-sub">Upload your {client_industry.title() if client_industry else ""} data — CSV or Excel{f" · {cn}" if cn else ""}</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -343,6 +352,10 @@ def page_upload():
 
                 df, clean_rep = clean_data(df_raw.copy())
                 industry = detect_industry(df)
+
+                # If client, force their industry
+                if client_industry:
+                    industry = client_industry
 
                 if industry == "hospital":   kpis, charts, insights = process_hospital(df)
                 elif industry == "ecommerce": kpis, charts, insights = process_ecommerce(df)
@@ -843,3 +856,10 @@ if is_client() and page in ("clients", "users", "festival"):
     page = "dashboard"
     st.session_state["page"] = page
 
+if   page == "upload":    page_upload()
+elif page == "dashboard": page_dashboard()
+elif page == "entry":     page_entry()
+elif page == "clients":   page_clients()
+elif page == "users":     page_users()
+elif page == "festival":  page_festival()
+else:                     page_upload()
