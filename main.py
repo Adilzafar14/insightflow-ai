@@ -269,7 +269,7 @@ def render_sidebar():
 
         # Navigation
         if is_admin():
-            pages = {"upload": "📁  Upload & Analyze", "c_entry": "✏️  Data Entry", "clients": "👥  Clients", "users": "🔐  Users", "festival": "🎉  Festivals"}
+            pages = {"upload": "??  Upload & Analyze", "entry": "??  Data Entry", "chatbot": "??  AI Chatbot", "clients": "??  Clients", "users": "??  Users", "festival": "??  Festivals"}
         else:
             pages = {"dashboard": "📈  My Dashboard", "client_entry": "✏️  Data Entry"}
             if st.session_state.get("df") is None:
