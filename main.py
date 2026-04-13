@@ -653,7 +653,7 @@ def page_clients():
     st.markdown('<div class="hero"><div class="hero-badge">👥 Management</div><div class="hero-title">Client Management</div><div class="hero-sub">Add and manage Lucknow clients</div></div>', unsafe_allow_html=True)
 
     with st.expander("➕ Add New Client"):
-        with st.form("add_client"):
+        with st.form("form_client_new"):
             c1, c2 = st.columns(2)
             with c1:
                 nm  = st.text_input("Client Name *")
@@ -686,7 +686,7 @@ def page_users():
 
     clients = get_clients()
     with st.expander("➕ Add New User"):
-        with st.form("add_user"):
+        with st.form("form_user_new"):
             c1, c2 = st.columns(2)
             with c1:
                 un   = st.text_input("Username *")
