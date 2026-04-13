@@ -63,7 +63,7 @@ def page_entry():
     tab1, tab2 = st.tabs(["✏️ Naya Entry", "📋 Previous Entries"])
 
     with tab1:
-        entry_date = st.date_input("Date", value=datetime.now().date())
+        entry_date = st.date_input("Date", value=datetime.now().date(), key="entry_date")
         st.markdown('<div class="section-title">📝 DATA FILL KARO</div>', unsafe_allow_html=True)
 
         data = {}

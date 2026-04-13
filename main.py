@@ -275,7 +275,7 @@ def render_sidebar():
 
         for i, (pk, pl) in enumerate(pages.items()):
             t = "primary" if st.session_state.get("page") == pk else "secondary"
-            if st.button(pl, key=f"nav_{i}_{pk}", use_container_width=True, type=t):
+            if st.button(pl, key=f"sbtn_{i}_{pk}", use_container_width=True, type=t):
                 st.session_state["page"] = pk
                 st.rerun()
 
@@ -303,7 +303,7 @@ def render_sidebar():
             """, unsafe_allow_html=True)
 
         st.markdown('<hr style="border-color:#21262D; margin:1rem 0;">', unsafe_allow_html=True)
-        if st.button("🚪  Sign Out", key="nav_signout", use_container_width=True):
+        if st.button("🚪  Sign Out", key="sbtn_signout", use_container_width=True):
             do_logout(); st.rerun()
         st.caption("InsightFlow AI v3.0")
 
@@ -653,7 +653,7 @@ def page_clients():
     st.markdown('<div class="hero"><div class="hero-badge">👥 Management</div><div class="hero-title">Client Management</div><div class="hero-sub">Add and manage Lucknow clients</div></div>', unsafe_allow_html=True)
 
     with st.expander("➕ Add New Client"):
-        with st.form("form_client_new"):
+        with st.form("frm_add_client"):
             c1, c2 = st.columns(2)
             with c1:
                 nm  = st.text_input("Client Name *")
@@ -686,7 +686,7 @@ def page_users():
 
     clients = get_clients()
     with st.expander("➕ Add New User"):
-        with st.form("form_user_new"):
+        with st.form("frm_add_user"):
             c1, c2 = st.columns(2)
             with c1:
                 un   = st.text_input("Username *")
