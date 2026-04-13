@@ -31,12 +31,12 @@ def generate_pdf_report(client_name, industry, kpis, insights, df):
 
         # Custom styles
         title_style = ParagraphStyle('title',
-            fontSize=24, fontName='Helvetica-Bold',
-            textColor=BLUE, alignment=TA_CENTER, spaceAfter=6)
+            fontSize=20, fontName='Helvetica-Bold',
+            textColor=BLUE, alignment=TA_CENTER, spaceAfter=12)
 
         subtitle_style = ParagraphStyle('subtitle',
-            fontSize=12, fontName='Helvetica',
-            textColor=GRAY, alignment=TA_CENTER, spaceAfter=20)
+            fontSize=11, fontName='Helvetica',
+            textColor=GRAY, alignment=TA_CENTER, spaceAfter=12)
 
         section_style = ParagraphStyle('section',
             fontSize=13, fontName='Helvetica-Bold',
@@ -57,11 +57,13 @@ def generate_pdf_report(client_name, industry, kpis, insights, df):
         story = []
 
         # ── HEADER ──────────────────────────────────────────
-        story.append(Spacer(1, 0.5*cm))
+        story.append(Spacer(1, 1*cm))
         story.append(Paragraph("InsightFlow AI", title_style))
-        story.append(Paragraph("Data Analytics Report", subtitle_style))
-        story.append(HRFlowable(width="100%", thickness=1, color=BLUE))
         story.append(Spacer(1, 0.3*cm))
+        story.append(Paragraph("Data Analytics Report", subtitle_style))
+        story.append(Spacer(1, 0.3*cm))
+        story.append(HRFlowable(width="100%", thickness=1, color=BLUE))
+        story.append(Spacer(1, 0.5*cm))
 
         # Client info table
         ind_icons = {"hospital": "🏥", "ecommerce": "🛒", "logistics": "🚚", "education": "🎓", "generic": "📊"}
