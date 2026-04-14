@@ -857,3 +857,11 @@ if is_client() and page in ("clients", "users", "festival"):
     page = "dashboard"
     st.session_state["page"] = page
 
+if   page == "upload":    page_upload()
+elif page == "dashboard": page_dashboard()
+elif page == "entry":     page_entry()
+elif page == "clients":   page_clients()
+elif page == "users":     page_users()
+elif page == "chatbot":   page_chatbot()
+elif page == "festival":  page_festival()
+else:                     page_upload()
