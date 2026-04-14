@@ -835,7 +835,6 @@ for k, v in defaults.items():
 if not is_logged_in():
     page_login()
     st.stop()
-render_sidebar()
 
 page = st.session_state.get("page", "upload")
 
@@ -843,7 +842,6 @@ if is_client() and page in ("clients", "users", "festival"):
     page = "dashboard"
     st.session_state["page"] = page
 
-if   page == "upload":    page_upload()
 elif page == "dashboard": page_dashboard()
 elif page == "entry":     page_entry()
 elif page == "clients":   page_clients()
