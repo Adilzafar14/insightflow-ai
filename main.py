@@ -832,14 +832,6 @@ for k, v in defaults.items():
     if k not in st.session_state:
         st.session_state[k] = v
 
-if not is_logged_in():
-    page_login()
-    st.stop()
-
-page = st.session_state.get("page", "upload")
-
-if is_client() and page in ("clients", "users", "festival"):
-    page = "dashboard"
 else:                     page_upload()
 
 
