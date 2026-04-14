@@ -275,7 +275,7 @@ def render_sidebar():
 
         for pk, pl in pages.items():
             t = "primary" if st.session_state.get("page") == pk else "secondary"
-            if st.button(pl, key=f"sb_{u[chr(39)]role[chr(39)]}_{pk}", use_container_width=True, type=t):
+            if st.button(pl, key="sb_" + pk, use_container_width=True, type=t):
                 st.session_state["page"] = pk
                 st.rerun()
 
