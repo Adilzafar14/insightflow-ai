@@ -253,7 +253,7 @@ def page_login():
             st.session_state["page"] = "signup"
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
-        st.markdown('<p style="text-align:center; color:#6E7681; font-size:0.75rem; margin-top:1rem;">Default: <b style="color:#8B949E">admin</b> / <b style="color:#8B949E">admin@123</b></p>', unsafe_allow_html=True)
+
 
 
 def render_sidebar():
