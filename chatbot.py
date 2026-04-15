@@ -91,12 +91,16 @@ def page_chatbot():
 
     # API Settings
     st.markdown('<div class="section-title">⚙️ AI SETTINGS</div>', unsafe_allow_html=True)
-        api_type_sel = st.selectbox("AI Provider", ["groq (Free)", "claude (Paid)"], key="api_type")
-        api_type = "groq" if "groq" in api_type_sel else "claude"
-        default_key = st.secrets.get("GROQ_API_KEY", "") if api_type == "groq" else ""
-        default_key = st.secrets.get("GROQ_API_KEY", "") if api_type == "groq" else ""
+    c1, c2 = st.columns([1, 2])
+    with c1:
+        api_type = st.selectbox("AI Provider", ["groq (Free)", "claude (Paid)"], key="api_type")
+        api_type = "groq" if "groq" in api_type else "claude"
     with c2:
-        placeholder = "Auto-loaded!" if default_key else ("gsk_... Groq key" if api_type == "groq" else "sk-ant-...")
+        # Auto-load from Streamlit secrets
+        default_key = ""
+        if api_type == "groq":
+            default_key = st.secrets.get("GROQ_API_KEY", "")
+        placeholder = "Auto-loaded from secrets!" if default_key else ("gsk_... (Groq API key)" if api_type == "groq" else "sk-ant-...")
         api_key = st.text_input("API Key", value=default_key, type="password", placeholder=placeholder, key="chat_api_key")
 
     if not api_key:
