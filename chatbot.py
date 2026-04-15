@@ -93,8 +93,8 @@ def page_chatbot():
     st.markdown('<div class="section-title">⚙️ AI SETTINGS</div>', unsafe_allow_html=True)
     c1, c2 = st.columns([1, 2])
     with c1:
-        default_key = st.secrets.get("GROQ_API_KEY", "") if api_type == "groq" else ""
         api_type = "groq" if "groq" in api_type else "claude"
+        default_key = st.secrets.get("GROQ_API_KEY", "") if api_type == "groq" else ""
     with c2:
         placeholder = "Auto-loaded!" if default_key else ("gsk_... Groq key" if api_type == "groq" else "sk-ant-...")
         api_key = st.text_input("API Key", value=default_key, type="password", placeholder=placeholder, key="chat_api_key")
