@@ -201,15 +201,3 @@ def do_logout():
     st.session_state[KEY] = None
     for k in ["df", "result", "page", "ac", "ai_insight"]:
         st.session_state.pop(k, None)
-
-def delete_client(cid):
-    c = get_db()
-    c.execute('UPDATE clients SET is_active=0 WHERE id=?', (cid,))
-    c.commit()
-    c.close()
-
-def save_client_data(client_id, industry, filename, df):
-    return False
-
-def load_client_data(client_id):
-    return None, None, None
