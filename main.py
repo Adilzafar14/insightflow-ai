@@ -273,10 +273,10 @@ def render_sidebar():
         </div>
         """, unsafe_allow_html=True)
 
-        # Navigation
-        if is_admin():
-            pages = {"upload": "📁 Upload", "entry": "✏️ Data Entry", "chatbot": "🤖 AI Chatbot", "clients": "👥 Clients", "users": "🔐 Users", "festival": "🎉 Festivals"}
+            pages = {"upload": "?? Upload & Analyze", "entry": "?? Data Entry", "chatbot": "?? AI Chatbot", "clients": "?? Clients", "users": "?? Users", "festival": "?? Festivals", "profile": "?? Profile"}
         else:
+            pages = {"dashboard": "?? My Dashboard", "upload": "?? Upload Data", "entry": "?? Data Entry", "chatbot": "?? AI Chatbot", "profile": "?? Profile"}
+
             if st.session_state.get("df") is not None:
                 pages = {"dashboard": "📈 Dashboard", "entry": "✏️ Data Entry", "chatbot": "🤖 AI Chatbot", "profile": "👤 Profile"}
             else:
