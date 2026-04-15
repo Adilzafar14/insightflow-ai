@@ -207,8 +207,8 @@ def delete_client(cid):
     if sb:
         try:
             sb.table('clients').update({'is_active': 0}).eq('id', cid).execute()
-            return
-        except: pass
+        except Exception as ex:
+            st.error(f"Supabase error: {ex}")
     c = get_db()
     c.execute('UPDATE clients SET is_active=0 WHERE id=?', (cid,))
     c.commit(); c.close()
