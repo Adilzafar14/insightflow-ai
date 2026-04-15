@@ -718,8 +718,8 @@ def page_clients():
         with rd:
             if st.button("Del", key=f"dl_{cl['id']}", help="Delete"):
                 delete_client(cl["id"])
-                xdb.commit()
-                xdb.close()
+                st.rerun()
+
                 st.rerun()
         st.markdown('<hr style="border-color:#21262D;margin:0.3rem 0;">', unsafe_allow_html=True)
 
