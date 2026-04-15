@@ -91,9 +91,9 @@ def page_chatbot():
 
     # API Settings
     st.markdown('<div class="section-title">⚙️ AI SETTINGS</div>', unsafe_allow_html=True)
-    c1, c2 = st.columns([1, 2])
-    with c1:
-        api_type = "groq" if "groq" in api_type else "claude"
+        api_type_sel = st.selectbox("AI Provider", ["groq (Free)", "claude (Paid)"], key="api_type")
+        api_type = "groq" if "groq" in api_type_sel else "claude"
+        default_key = st.secrets.get("GROQ_API_KEY", "") if api_type == "groq" else ""
         default_key = st.secrets.get("GROQ_API_KEY", "") if api_type == "groq" else ""
     with c2:
         placeholder = "Auto-loaded!" if default_key else ("gsk_... Groq key" if api_type == "groq" else "sk-ant-...")
