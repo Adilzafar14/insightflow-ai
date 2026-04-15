@@ -247,7 +247,7 @@ def page_login():
                 else:
                     st.error(r["msg"])
         st.markdown("</div>", unsafe_allow_html=True)
-
+        st.markdown('<p style="text-align:center; color:#6E7681; font-size:0.75rem; margin-top:1rem;">Default: <b style="color:#8B949E">admin</b> / <b style="color:#8B949E">admin@123</b></p>', unsafe_allow_html=True)
 
 
 def render_sidebar():
@@ -272,7 +272,7 @@ def render_sidebar():
             pages = {"upload": "📁 Upload", "entry": "✏️ Data Entry", "chatbot": "🤖 AI Chatbot", "clients": "👥 Clients", "users": "🔐 Users", "festival": "🎉 Festivals"}
         else:
             if st.session_state.get("df") is not None:
-                pages = {"dashboard": "📈 Dashboard", "entry": "✏️ Data Entry", "chatbot": "🤖 AI Chatbot"}
+                pages = {"dashboard": "📈 Dashboard", "entry": "✏️ Data Entry", "chatbot": "🤖 AI Chatbot", "profile": "👤 Profile"}
             else:
                 pages = {"upload": "📁  Upload Data", "entry": "✏️  Data Entry"}
             # Auto redirect client to dashboard if data loaded
@@ -780,6 +780,53 @@ def page_users():
 
 
 
+
+def page_profile():
+    u = get_user()
+    st.markdown(f"""
+    <div class="hero">
+        <div class="hero-badge">👤 Profile</div>
+        <div class="hero-title">My Profile</div>
+        <div class="hero-sub">Apni account settings manage karo</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="section-title">🔐 CHANGE PASSWORD</div>', unsafe_allow_html=True)
+    
+    with st.form("frm_change_pw"):
+        old_pw  = st.text_input("Current Password", type="password", key="old_pw")
+        new_pw  = st.text_input("New Password (min 6 chars)", type="password", key="new_pw")
+        conf_pw = st.text_input("Confirm New Password", type="password", key="conf_pw")
+        
+        if st.form_submit_button("Update Password", use_container_width=True, type="primary"):
+            if not old_pw or not new_pw or not conf_pw:
+                st.error("Sab fields bharo!")
+            elif new_pw != conf_pw:
+                st.error("New password aur confirm password match nahi karte!")
+            elif len(new_pw) < 6:
+                st.error("Password minimum 6 characters ka hona chahiye!")
+            else:
+                # Verify old password
+                c = get_db()
+                user = c.execute("SELECT * FROM users WHERE id=?", (u["id"],)).fetchone()
+                c.close()
+                if user and verify_pw(old_pw, user["password_hash"], user["salt"]):
+                    if upw(u["id"], new_pw):
+                        st.success("✅ Password successfully change ho gaya!")
+                    else:
+                        st.error("Password change nahi hua — try again!")
+                else:
+                    st.error("❌ Current password galat hai!")
+
+    st.markdown('<div class="section-title">👤 ACCOUNT INFO</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Username", u["username"])
+        st.metric("Role", u["role"].title())
+    with col2:
+        st.metric("Full Name", u["name"] or "—")
+        st.metric("Client", u.get("cn") or "Admin")
+
 def page_festival():
     st.markdown('<div class="hero"><div class="hero-badge">🎉 Lucknow Calendar</div><div class="hero-title">Festival & Business Calendar 2026</div><div class="hero-sub">Plan your business strategy around Lucknow festivals</div></div>', unsafe_allow_html=True)
 
@@ -863,6 +910,7 @@ elif page == "entry":     page_entry()
 elif page == "clients":   page_clients()
 elif page == "users":     page_users()
 elif page == "chatbot":   page_chatbot()
+elif page == "profile":   page_profile()
 elif page == "festival":  page_festival()
 else:                     page_upload()
 
