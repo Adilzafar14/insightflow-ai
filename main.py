@@ -7,7 +7,7 @@ from datetime import datetime
 
 from auth import (init_db, is_logged_in, get_user, is_admin, is_client,
                   set_session, do_logout, login, create_user, get_clients,
-                  get_users, add_client, upw, toggle_user, get_db, verify_pw, delete_client)
+                  get_users, add_client, upw, toggle_user)
 from pipeline import detect_industry, clean_data, process_hospital, process_ecommerce, process_logistics, process_education, process_generic
 from dashboard import COLORS, DARK_LAYOUT, render_chart, render_multivariate
 from portal import page_entry
@@ -374,6 +374,9 @@ def page_upload():
                     "df": df, "kpis": kpis, "charts": charts,
                     "insights": insights, "industry": industry
                 })
+                # Save to Supabase if client logged in
+                if is_client() and get_user().get("client_id"):
+                    save_client_data(get_user()["client_id"], industry, uploaded.name, df)
 
                 # Claude AI
                 if use_ai and api_key:
@@ -718,8 +721,8 @@ def page_clients():
         with rd:
             if st.button("Del", key=f"dl_{cl['id']}", help="Delete"):
                 delete_client(cl["id"])
-                st.rerun()
-
+                xdb.commit()
+                xdb.close()
                 st.rerun()
         st.markdown('<hr style="border-color:#21262D;margin:0.3rem 0;">', unsafe_allow_html=True)
 
@@ -912,4 +915,3 @@ elif page == "chatbot":   page_chatbot()
 elif page == "profile":   page_profile()
 elif page == "festival":  page_festival()
 else:                     page_upload()
-

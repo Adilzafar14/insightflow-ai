@@ -304,6 +304,45 @@ def get_entries(client_id, industry=None, limit=30):
         result.append(d)
     return result
 
+
+def save_client_data(client_id, industry, filename, df):
+    """Save client CSV data to Supabase"""
+    import json
+    sb = get_supabase()
+    if sb:
+        try:
+            # Convert df to JSON
+            data_json = df.to_json(orient="records")
+            # Delete old data for this client
+            sb.table("client_data").delete().eq("client_id", client_id).execute()
+            # Save new data
+            sb.table("client_data").insert({
+                "client_id": client_id,
+                "filename": filename,
+                "industry": industry,
+                "data": data_json
+            }).execute()
+            return True
+        except Exception as e:
+            return False
+    return False
+
+def load_client_data(client_id):
+    """Load client data from Supabase"""
+    import pandas as pd
+    import json
+    sb = get_supabase()
+    if sb:
+        try:
+            res = sb.table("client_data").select("*").eq("client_id", client_id).order("uploaded_at", desc=True).limit(1).execute()
+            if res.data:
+                row = res.data[0]
+                df = pd.read_json(row["data"])
+                return df, row.get("industry", "generic"), row.get("filename", "data.csv")
+        except:
+            pass
+    return None, None, None
+
 def delete_client(cid):
     sb = get_supabase()
     if sb:
