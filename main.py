@@ -7,7 +7,7 @@ from datetime import datetime
 
 from auth import (init_db, is_logged_in, get_user, is_admin, is_client,
                   set_session, do_logout, login, create_user, get_clients,
-                  get_users, add_client, upw, toggle_user)
+                  get_users, add_client, upw, toggle_user, get_db, verify_pw)
 from pipeline import detect_industry, clean_data, process_hospital, process_ecommerce, process_logistics, process_education, process_generic
 from dashboard import COLORS, DARK_LAYOUT, render_chart, render_multivariate
 from portal import page_entry
