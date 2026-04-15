@@ -99,19 +99,29 @@ def login(un, pw):
 
     if sb:
         try:
-            res = sb.table("users").select("*, clients(name, industry)").eq("username", un.strip().lower()).execute()
+            # Simple query without join
+            res = sb.table("users").select("*").ilike("username", un.strip()).execute()
             if res.data:
                 u = res.data[0]
+                cn = None
+                ind = None
+                # Get client info separately
+                if u.get("client_id"):
+                    try:
+                        cl_res = sb.table("clients").select("name, industry").eq("id", u["client_id"]).execute()
+                        if cl_res.data:
+                            cn = cl_res.data[0]["name"]
+                            ind = cl_res.data[0]["industry"]
+                    except: pass
                 user = {
                     "id": u["id"], "username": u["username"],
                     "password_hash": u["password_hash"], "salt": u["salt"],
                     "role": u["role"], "client_id": u.get("client_id"),
                     "full_name": u.get("full_name", ""),
                     "is_active": u.get("is_active", 1),
-                    "cn": u["clients"]["name"] if u.get("clients") else None,
-                    "ind": u["clients"]["industry"] if u.get("clients") else None
+                    "cn": cn, "ind": ind
                 }
-        except:
+        except Exception as e:
             pass
 
     # Fallback to SQLite
