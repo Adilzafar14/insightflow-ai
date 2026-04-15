@@ -11,6 +11,8 @@ from auth import (init_db, is_logged_in, get_user, is_admin, is_client,
 from pipeline import detect_industry, clean_data, process_hospital, process_ecommerce, process_logistics, process_education, process_generic
 from dashboard import COLORS, DARK_LAYOUT, render_chart, render_multivariate
 from portal import page_entry
+from reports import generate_pdf_report
+from chatbot import page_chatbot
 
 st.set_page_config(
     page_title="InsightFlow AI",
@@ -22,7 +24,7 @@ st.set_page_config(
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-*, html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
+*, html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif !important; }
 
 /* Hide keyboard double arrow icon */
 span[data-testid="stIconMaterial"] { display: none !important; }
@@ -267,15 +269,19 @@ def render_sidebar():
 
         # Navigation
         if is_admin():
-            pages = {"upload": "📁  Upload & Analyze", "c_entry": "✏️  Data Entry", "clients": "👥  Clients", "users": "🔐  Users", "festival": "🎉  Festivals"}
+            pages = {"upload": "📁 Upload", "entry": "✏️ Data Entry", "chatbot": "🤖 AI Chatbot", "clients": "👥 Clients", "users": "🔐 Users", "festival": "🎉 Festivals"}
         else:
-            pages = {"dashboard": "📈  My Dashboard", "client_entry": "✏️  Data Entry"}
-            if st.session_state.get("df") is None:
-                pages = {"upload": "📁  Upload Data", **pages}
+            if st.session_state.get("df") is not None:
+                pages = {"dashboard": "📈 Dashboard", "entry": "✏️ Data Entry", "chatbot": "🤖 AI Chatbot", "profile": "👤 Profile"}
+            else:
+                pages = {"upload": "📁  Upload Data", "entry": "✏️  Data Entry"}
+            # Auto redirect client to dashboard if data loaded
+            if st.session_state.get("df") is not None and st.session_state.get("page") == "upload":
+                st.session_state["page"] = "dashboard"
 
-        for pk, pl in pages.items():
+        for i, (pk, pl) in enumerate(pages.items()):
             t = "primary" if st.session_state.get("page") == pk else "secondary"
-            if st.button(pl, key=f"sidebar_btn_{pk}", use_container_width=True, type=t):
+            if st.button(pl, key=f"sbtn_{i}_{pk}", use_container_width=True, type=t):
                 st.session_state["page"] = pk
                 st.rerun()
 
@@ -303,7 +309,7 @@ def render_sidebar():
             """, unsafe_allow_html=True)
 
         st.markdown('<hr style="border-color:#21262D; margin:1rem 0;">', unsafe_allow_html=True)
-        if st.button("🚪  Sign Out", use_container_width=True):
+        if st.button("🚪  Sign Out", key="sbtn_signout", use_container_width=True):
             do_logout(); st.rerun()
         st.caption("InsightFlow AI v3.0")
 
@@ -312,11 +318,19 @@ def page_upload():
     ac = st.session_state.get("ac", {}) or {}
     cn = ac.get("name", "") or (get_user().get("cn") or "")
 
+    # Client industry restriction
+    client_industry = None
+    if is_client() and get_user().get("client_id"):
+        c = get_db()
+        cl = c.execute("SELECT industry FROM clients WHERE id=?", (get_user()["client_id"],)).fetchone()
+        c.close()
+        if cl: client_industry = cl["industry"]
+
     st.markdown(f"""
     <div class="hero">
         <div class="hero-badge">📍 Lucknow · Data Analytics</div>
         <div class="hero-title">📊 Upload & Analyze</div>
-        <div class="hero-sub">Upload any CSV or Excel — Hospital, Ecommerce, Logistics, Education, or any data{f" · {cn}" if cn else ""}</div>
+        <div class="hero-sub">Upload your {client_industry.title() if client_industry else ""} data — CSV or Excel{f" · {cn}" if cn else ""}</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -343,6 +357,12 @@ def page_upload():
 
                 df, clean_rep = clean_data(df_raw.copy())
                 industry = detect_industry(df)
+
+                # If client, force their industry
+                if client_industry:
+                    if industry != client_industry:
+                        st.warning(f"⚠️ Wrong data! Aapko sirf {client_industry.title()} data upload karna chahiye. Analysis {client_industry.title()} mode mein hoga.")
+                    industry = client_industry
 
                 if industry == "hospital":   kpis, charts, insights = process_hospital(df)
                 elif industry == "ecommerce": kpis, charts, insights = process_ecommerce(df)
@@ -648,45 +668,68 @@ def page_dashboard():
             except:
                 pass
 
+        st.markdown('<div class="section-title">📄 PDF REPORT</div>', unsafe_allow_html=True)
+        if st.button("📄 Generate PDF Report", type="primary", use_container_width=True, key="btn_pdf"):
+            with st.spinner("PDF ban raha hai..."):
+                pdf = generate_pdf_report(cn, industry, kpis, insights, df)
+                if pdf:
+                    st.download_button(
+                        "⬇️ Download PDF Report",
+                        pdf,
+                        f"{cn}_InsightFlow_Report_{datetime.now().strftime('%Y%m%d')}.pdf",
+                        "application/pdf",
+                        use_container_width=True,
+                        key="btn_dl_pdf"
+                    )
+                    st.success("✅ PDF ready!")
+                else:
+                    st.error("PDF generate nahi hua.")
+
 
 def page_clients():
-    st.markdown('<div class="hero"><div class="hero-badge">👥 Management</div><div class="hero-title">Client Management</div><div class="hero-sub">Add and manage Lucknow clients</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero"><div class="hero-badge">👥 Management</div><div class="hero-title">Client Management</div><div class="hero-sub">Add and manage clients</div></div>', unsafe_allow_html=True)
 
     with st.expander("➕ Add New Client"):
-        with st.form("add_client"):
-            c1, c2 = st.columns(2)
-            with c1:
+        with st.form("frm_add_client"):
+            r1c1, r1c2 = st.columns(2)
+            with r1c1:
                 nm  = st.text_input("Client Name *")
                 ind = st.selectbox("Industry", ["hospital", "ecommerce", "logistics", "education", "other"])
-            with c2:
+            with r1c2:
                 em   = st.text_input("Email")
-                city = st.selectbox("Lucknow Area", ["Hazratganj", "Gomtinagar", "Alambagh", "Chowk", "Aliganj", "Indira Nagar", "Rajajipuram", "Chinhat", "Other"])
-            if st.form_submit_button("✅ Add Client", use_container_width=True) and nm:
-                cid = add_client(nm, ind, em, city)
-                st.success(f"✅ '{nm}' added! ID: {cid}")
+                city = st.selectbox("Area", ["Hazratganj", "Gomtinagar", "Alambagh", "Chowk", "Aliganj", "Indira Nagar", "Other"])
+            if st.form_submit_button("Add Client", use_container_width=True) and nm:
+                add_client(nm, ind, em, city)
+                st.success(f"Added!")
                 st.rerun()
 
-    icons = {"hospital": "🏥", "ecommerce": "🛒", "logistics": "🚚", "education": "🎓", "other": "📊"}
-    for c in get_clients():
-        c1, c2, c3 = st.columns([4, 3, 1])
-        with c1:
-            st.markdown(f'<div style="color:#E6EDF3; font-weight:600;">{icons.get(c["industry"],"📊")} {c["name"]}</div><div style="font-size:0.78rem; color:#6E7681;">📍 {c.get("city","Lucknow")} · {c["industry"]}</div>', unsafe_allow_html=True)
-        with c2:
-            st.caption(c.get("email") or "—")
-        with c3:
-            if st.button("Load", key=f"load_{c['id']}", use_container_width=True):
-                st.session_state["ac"] = c
+    icons = {"hospital": "Hospital", "ecommerce": "Shop", "logistics": "Logistics", "education": "College", "other": "Other"}
+    for cl in get_clients():
+        ra, rb, rc, rd = st.columns([4, 3, 1, 1])
+        with ra:
+            st.markdown(f'<div style="color:#E6EDF3;font-weight:600;">{cl["name"]}</div><div style="font-size:0.78rem;color:#6E7681;">{cl.get("city","Lucknow")} · {cl["industry"]}</div>', unsafe_allow_html=True)
+        with rb:
+            st.caption(cl.get("email") or "—")
+        with rc:
+            if st.button("Load", key=f"ld_{cl['id']}", use_container_width=True):
+                st.session_state["ac"] = cl
                 st.session_state["page"] = "upload"
                 st.rerun()
-        st.markdown('<hr style="border-color:#21262D; margin:0.4rem 0;">', unsafe_allow_html=True)
-
+        with rd:
+            if st.button("Del", key=f"dl_{cl['id']}", help="Delete"):
+                xdb = get_db()
+                xdb.execute("UPDATE clients SET is_active=0 WHERE id=?", (cl["id"],))
+                xdb.commit()
+                xdb.close()
+                st.rerun()
+        st.markdown('<hr style="border-color:#21262D;margin:0.3rem 0;">', unsafe_allow_html=True)
 
 def page_users():
     st.markdown('<div class="hero"><div class="hero-badge">🔐 Access Control</div><div class="hero-title">User Management</div><div class="hero-sub">Create and manage user accounts</div></div>', unsafe_allow_html=True)
 
     clients = get_clients()
     with st.expander("➕ Add New User"):
-        with st.form("add_user"):
+        with st.form("frm_add_user"):
             c1, c2 = st.columns(2)
             with c1:
                 un   = st.text_input("Username *")
@@ -736,6 +779,53 @@ def page_users():
 
 
 
+
+
+def page_profile():
+    u = get_user()
+    st.markdown(f"""
+    <div class="hero">
+        <div class="hero-badge">👤 Profile</div>
+        <div class="hero-title">My Profile</div>
+        <div class="hero-sub">Apni account settings manage karo</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="section-title">🔐 CHANGE PASSWORD</div>', unsafe_allow_html=True)
+    
+    with st.form("frm_change_pw"):
+        old_pw  = st.text_input("Current Password", type="password", key="old_pw")
+        new_pw  = st.text_input("New Password (min 6 chars)", type="password", key="new_pw")
+        conf_pw = st.text_input("Confirm New Password", type="password", key="conf_pw")
+        
+        if st.form_submit_button("Update Password", use_container_width=True, type="primary"):
+            if not old_pw or not new_pw or not conf_pw:
+                st.error("Sab fields bharo!")
+            elif new_pw != conf_pw:
+                st.error("New password aur confirm password match nahi karte!")
+            elif len(new_pw) < 6:
+                st.error("Password minimum 6 characters ka hona chahiye!")
+            else:
+                # Verify old password
+                c = get_db()
+                user = c.execute("SELECT * FROM users WHERE id=?", (u["id"],)).fetchone()
+                c.close()
+                if user and verify_pw(old_pw, user["password_hash"], user["salt"]):
+                    if upw(u["id"], new_pw):
+                        st.success("✅ Password successfully change ho gaya!")
+                    else:
+                        st.error("Password change nahi hua — try again!")
+                else:
+                    st.error("❌ Current password galat hai!")
+
+    st.markdown('<div class="section-title">👤 ACCOUNT INFO</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Username", u["username"])
+        st.metric("Role", u["role"].title())
+    with col2:
+        st.metric("Full Name", u["name"] or "—")
+        st.metric("Client", u.get("cn") or "Admin")
 
 def page_festival():
     st.markdown('<div class="hero"><div class="hero-badge">🎉 Lucknow Calendar</div><div class="hero-title">Festival & Business Calendar 2026</div><div class="hero-sub">Plan your business strategy around Lucknow festivals</div></div>', unsafe_allow_html=True)
@@ -816,38 +906,11 @@ if is_client() and page in ("clients", "users", "festival"):
 
 if   page == "upload":    page_upload()
 elif page == "dashboard": page_dashboard()
-elif page in ("entry", "c_entry"):     page_entry()
-elif page == "clients":   page_clients()
-elif page == "users":     page_users()
-elif page == "festival":  page_festival()
-else:                     page_upload()
-
-# ══════════════════════════════════════════════════════════════════
-# MAIN ROUTER
-# ══════════════════════════════════════════════════════════════════
-init_db()
-
-defaults = {"page": "login", "df": None, "kpis": {}, "charts": {}, "insights": [], "industry": None, "ac": None, "ai_insight": None}
-for k, v in defaults.items():
-    if k not in st.session_state:
-        st.session_state[k] = v
-
-if not is_logged_in():
-    page_login()
-    st.stop()
-
-render_sidebar()
-
-page = st.session_state.get("page", "upload")
-
-if is_client() and page in ("clients", "users", "festival"):
-    page = "dashboard"
-    st.session_state["page"] = page
-
-if   page == "upload":    page_upload()
-elif page == "dashboard": page_dashboard()
 elif page == "entry":     page_entry()
 elif page == "clients":   page_clients()
 elif page == "users":     page_users()
+elif page == "chatbot":   page_chatbot()
+elif page == "profile":   page_profile()
 elif page == "festival":  page_festival()
 else:                     page_upload()
+
