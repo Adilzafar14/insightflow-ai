@@ -246,8 +246,14 @@ def page_login():
                     st.rerun()
                 else:
                     st.error(r["msg"])
+        
+        st.markdown("<hr style='border-color:#21262D;margin:1rem 0;'>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align:center;color:#8B949E;font-size:0.85rem;'>New user? Create your account</p>", unsafe_allow_html=True)
+        if st.button("Create Account →", use_container_width=True, type="secondary"):
+            st.session_state["page"] = "signup"
+            st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
-
+        st.markdown('<p style="text-align:center; color:#6E7681; font-size:0.75rem; margin-top:1rem;">Default: <b style="color:#8B949E">admin</b> / <b style="color:#8B949E">admin@123</b></p>', unsafe_allow_html=True)
 
 
 def render_sidebar():
@@ -452,6 +458,69 @@ Use Indian currency context (Rs, lakh, crore). Use emojis. Keep each insight to 
             </div>
             """, unsafe_allow_html=True)
 
+
+
+def page_signup():
+    st.markdown("""
+    <style>
+    [data-testid="stAppViewContainer"] { background: radial-gradient(ellipse at top, #0D1F3C 0%, #0A0F1E 60%); }
+    </style>
+    """, unsafe_allow_html=True)
+
+    _, col, _ = st.columns([1, 1.1, 1])
+    with col:
+        st.markdown("""
+        <div style="text-align:center; padding: 2rem 0 1.5rem;">
+            <div style="font-size: 3rem;">📊</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #E6EDF3; margin-top: 0.5rem;">InsightFlow AI</div>
+            <div style="color: #8B949E; font-size: 0.9rem;">Create your account</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown('<div class="login-card">', unsafe_allow_html=True)
+        st.markdown('<p style="color:#E6EDF3;font-weight:600;font-size:1rem;margin-bottom:1rem;">📝 Sign Up</p>', unsafe_allow_html=True)
+
+        full_name = st.text_input("Full Name *", placeholder="Apna naam daalo")
+        username  = st.text_input("Username *", placeholder="Unique username choose karo")
+        email     = st.text_input("Email", placeholder="email@example.com")
+        industry  = st.selectbox("Business Type *", ["hospital", "ecommerce", "logistics", "education", "other"])
+        city      = st.selectbox("City", ["Lucknow", "Kanpur", "Prayagraj", "Varanasi", "Noida", "Delhi", "Other"])
+        pw1       = st.text_input("Password *", type="password", placeholder="Min 6 characters")
+        pw2       = st.text_input("Confirm Password *", type="password", placeholder="Password dobara daalo")
+
+        if st.button("Create Account →", use_container_width=True, type="primary"):
+            if not full_name or not username or not pw1 or not pw2:
+                st.error("Sab starred fields bharo!")
+            elif pw1 != pw2:
+                st.error("Passwords match nahi karte!")
+            elif len(pw1) < 6:
+                st.error("Password minimum 6 characters ka hona chahiye!")
+            elif len(username.strip()) < 3:
+                st.error("Username minimum 3 characters ka hona chahiye!")
+            else:
+                # Create client first
+                client_id = add_client(full_name, industry, email, city)
+                # Create user
+                result = create_user(username, pw1, "client", client_id, full_name, email)
+                if result["ok"]:
+                    st.success("✅ Account ban gaya! Ab login karo.")
+                    st.balloons()
+                    import time
+                    time.sleep(2)
+                    st.session_state["page"] = "login"
+                    st.rerun()
+                else:
+                    st.error(result["msg"])
+                    # Delete client if user creation failed
+                    try:
+                        delete_client(client_id)
+                    except: pass
+
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("")
+        if st.button("← Back to Login", use_container_width=True):
+            st.session_state["page"] = "login"
+            st.rerun()
 
 def page_dashboard():
     if st.session_state.get("df") is None:
@@ -892,7 +961,11 @@ for k, v in defaults.items():
 
 # Login gate
 if not is_logged_in():
-    page_login()
+    if st.session_state.get("page") == "signup":
+        page_signup()
+    else:
+        st.session_state["page"] = "login"
+        page_login()
     st.stop()
 
 # Render sidebar
