@@ -304,6 +304,17 @@ def get_entries(client_id, industry=None, limit=30):
         result.append(d)
     return result
 
+def delete_client(cid):
+    sb = get_supabase()
+    if sb:
+        try:
+            sb.table("clients").update({"is_active": 0}).eq("id", cid).execute()
+            return
+        except: pass
+    c = get_db()
+    c.execute("UPDATE clients SET is_active=0 WHERE id=?", (cid,))
+    c.commit(); c.close()
+
 # Session helpers
 KEY = "insightflow_v2"
 def is_logged_in(): return st.session_state.get(KEY) is not None

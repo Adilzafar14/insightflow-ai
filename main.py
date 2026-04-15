@@ -7,7 +7,7 @@ from datetime import datetime
 
 from auth import (init_db, is_logged_in, get_user, is_admin, is_client,
                   set_session, do_logout, login, create_user, get_clients,
-                  get_users, add_client, upw, toggle_user, get_db, verify_pw)
+                  get_users, add_client, upw, toggle_user)
 from pipeline import detect_industry, clean_data, process_hospital, process_ecommerce, process_logistics, process_education, process_generic
 from dashboard import COLORS, DARK_LAYOUT, render_chart, render_multivariate
 from portal import page_entry
@@ -247,7 +247,7 @@ def page_login():
                 else:
                     st.error(r["msg"])
         st.markdown("</div>", unsafe_allow_html=True)
-
+        st.markdown('<p style="text-align:center; color:#6E7681; font-size:0.75rem; margin-top:1rem;">Default: <b style="color:#8B949E">admin</b> / <b style="color:#8B949E">admin@123</b></p>', unsafe_allow_html=True)
 
 
 def render_sidebar():
@@ -717,8 +717,7 @@ def page_clients():
                 st.rerun()
         with rd:
             if st.button("Del", key=f"dl_{cl['id']}", help="Delete"):
-                xdb = get_db()
-                xdb.execute("UPDATE clients SET is_active=0 WHERE id=?", (cl["id"],))
+                delete_client(cl["id"])
                 xdb.commit()
                 xdb.close()
                 st.rerun()
