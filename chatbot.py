@@ -98,11 +98,11 @@ def page_chatbot():
     with c2:
         # Auto-load from Streamlit secrets
         default_key = ""
-        if api_type == "groq":
-            default_key = st.secrets.get("GROQ_API_KEY", "")
-        placeholder = "Auto-loaded from secrets!" if default_key else ("gsk_... (Groq API key)" if api_type == "groq" else "sk-ant-...")
-        api_key = st.text_input("API Key", value=default_key, type="password", placeholder=placeholder, key="chat_api_key")
-
+        if default_key:
+            api_key = default_key
+            st.success("? API Key auto-loaded!")
+        else:
+            api_key = st.text_input("API Key", type="password", placeholder=placeholder, key="chat_api_key")
     if not api_key:
         st.info("💡 API key daalo — Groq free hai! console.groq.com pe jaake banao.")
         st.markdown('<div class="section-title">💬 SAMPLE QUESTIONS</div>', unsafe_allow_html=True)
