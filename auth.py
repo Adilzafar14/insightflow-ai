@@ -213,3 +213,24 @@ def save_client_data(client_id, industry, filename, df):
 
 def load_client_data(client_id):
     return None, None, None
+
+def create_user(un, pw, role='client', cid=None, fn='', em=''):
+    if len(un.strip()) < 3: return {'ok': False, 'msg': 'Username min 3 chars'}
+    if len(pw) < 6: return {'ok': False, 'msg': 'Password min 6 chars'}
+    h, s = _hash_pw(pw)
+    sb = get_supabase()
+    if sb:
+        try:
+            sb.table('users').insert({'username': un.strip().lower(), 'password_hash': h, 'salt': s, 'role': role, 'client_id': cid, 'full_name': fn, 'email': em, 'is_active': 1}).execute()
+            return {'ok': True, 'msg': f'User created!'}
+        except Exception as e:
+            if 'duplicate' in str(e).lower() or 'unique' in str(e).lower():
+                return {'ok': False, 'msg': 'Username already exists'}
+    c = get_db()
+    try:
+        c.execute('INSERT INTO users(username,password_hash,salt,role,client_id,full_name,email) VALUES(?,?,?,?,?,?,?)', (un.strip().lower(), h, s, role, cid, fn, em))
+        c.commit(); c.close()
+        return {'ok': True, 'msg': 'User created!'}
+    except:
+        c.close()
+        return {'ok': False, 'msg': 'Username already exists'}
