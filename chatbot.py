@@ -96,11 +96,11 @@ def page_chatbot():
         api_type = st.selectbox("AI Provider", ["groq (Free)", "claude (Paid)"], key="api_type")
         api_type = "groq" if "groq" in api_type else "claude"
     with c2:
-        # Auto-load from Streamlit secrets
-        default_key = ""
+        default_key = st.secrets.get("GROQ_API_KEY", "") if api_type == "groq" else ""
+        placeholder = "gsk_... Groq key" if api_type == "groq" else "sk-ant-..."
         if default_key:
             api_key = default_key
-            st.success("? API Key auto-loaded!")
+            st.success("API Key auto-loaded!")
         else:
             api_key = st.text_input("API Key", type="password", placeholder=placeholder, key="chat_api_key")
     if not api_key:
