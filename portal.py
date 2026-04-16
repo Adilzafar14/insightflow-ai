@@ -133,22 +133,33 @@ def page_entry():
             return
     else:
         if not u.get("client_id"):
+            st.error("Account client se linked nahi hai.")
+            return
+        # Try Supabase first
         from auth import get_supabase
         sb = get_supabase()
+        client = {}
         if sb:
             try:
                 res = sb.table("clients").select("*").eq("id", u["client_id"]).execute()
-                client = res.data[0] if res.data else {}
-            except:
-                c = get_db()
-                cl = c.execute("SELECT * FROM clients WHERE id=?", (u["client_id"],)).fetchone()
-                c.close()
-                client = dict(cl) if cl else {}
-        else:
-                c = get_db()
-                cl = c.execute("SELECT * FROM clients WHERE id=?", (u["client_id"],)).fetchone()
-                c.close()
-                client = dict(cl) if cl else {}
+                if res.data:
+                    client = res.data[0]
+            except: pass
+        if not client:
+            c = get_db()
+            cl = c.execute("SELECT * FROM clients WHERE id=?", (u["client_id"],)).fetchone()
+            c.close()
+            client = dict(cl) if cl else {}
+
+    if not client:
+        st.warning("Client select karo.")
+        return
+
+    industry = str(client.get("industry", "generic")).lower().strip()
+    # Normalize industry names
+    if industry not in ("hospital", "ecommerce", "logistics", "education"):
+        industry = "generic"
+    client_id = client["id"]
     client_name = client["name"]
 
     ind_icons = {"hospital": "🏥", "ecommerce": "🛒", "logistics": "🚚", "education": "🎓"}
