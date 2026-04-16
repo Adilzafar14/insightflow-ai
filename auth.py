@@ -2,6 +2,25 @@ import streamlit as st
 import hashlib, hmac, secrets, sqlite3
 from datetime import datetime
 
+_sb_client = None
+
+def get_supabase():
+    global _sb_client
+    if _sb_client: return _sb_client
+    try:
+        from supabase import create_client
+        url = st.secrets.get('SUPABASE_URL', '')
+        key = st.secrets.get('SUPABASE_KEY', '')
+        if url and key:
+            _sb_client = create_client(url, key)
+            return _sb_client
+    except: pass
+    return None
+
+import streamlit as st
+import hashlib, hmac, secrets, sqlite3
+from datetime import datetime
+
 DB = "insightflow.db"
 
 def get_db():
