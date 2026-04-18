@@ -817,15 +817,15 @@ def render_multivariate(df):
         with c2: y_col = st.selectbox("Y-axis", num_cols, index=1 if len(num_cols) > 1 else 0, key="bub_y")
         with c3: s_col = st.selectbox("Bubble size", num_cols, index=2 if len(num_cols) > 2 else 0, key="bub_s")
         c_col = cat_cols[0] if cat_cols else None
-        sample = df.sample(min(300, len(df)), random_state=42).copy()
-        sample[s_col] = sample[s_col].abs() + 1
-        fig = px.scatter(sample, x=x_col, y=y_col, size=s_col, color=c_col, color_discrete_sequence=COLORS, opacity=0.7,
-                         title=f"{x_col} vs {y_col} (size: {s_col})",
-                         size_max=40)
-        fig.update_layout(
-            plot_bgcolor="#161B22", paper_bgcolor="#161B22",
-            font=dict(color="#8B949E"), height=420,
-            margin=dict(l=10, r=10, t=40, b=10),
+        try:
+            sample = df.sample(min(300, len(df)), random_state=42).copy()
+            sample[s_col] = sample[s_col].fillna(0).abs() + 1
+            fig = px.scatter(sample, x=x_col, y=y_col, size=s_col, color=c_col, color_discrete_sequence=COLORS, opacity=0.7,
+                             title=f"{x_col} vs {y_col} (size: {s_col})", size_max=40)
+            fig.update_layout(plot_bgcolor="#161B22", paper_bgcolor="#161B22", font=dict(color="#8B949E"), height=420, margin=dict(l=10, r=10, t=40, b=10), xaxis=dict(gridcolor="#21262D"), yaxis=dict(gridcolor="#21262D"))
+            st.plotly_chart(fig, use_container_width=True)
+        except Exception as e:
+            st.info("Bubble chart is not available for this dataset.")
             xaxis=dict(gridcolor="#21262D"),
             yaxis=dict(gridcolor="#21262D"),
             legend=dict(font=dict(color="#8B949E"))
