@@ -826,12 +826,6 @@ def render_multivariate(df):
             st.plotly_chart(fig, use_container_width=True)
         except Exception as e:
             st.info("Bubble chart is not available for this dataset.")
-            xaxis=dict(gridcolor="#21262D"),
-            yaxis=dict(gridcolor="#21262D"),
-            legend=dict(font=dict(color="#8B949E"))
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
 # ══════════════════════════════════════════════════════════════════
 # PAGES
 # ══════════════════════════════════════════════════════════════════
