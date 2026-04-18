@@ -817,8 +817,8 @@ def render_multivariate(df):
         with c2: y_col = st.selectbox("Y-axis", num_cols, index=1 if len(num_cols) > 1 else 0, key="bub_y")
         with c3: s_col = st.selectbox("Bubble size", num_cols, index=2 if len(num_cols) > 2 else 0, key="bub_s")
         c_col = cat_cols[0] if cat_cols else None
-        sample = df.sample(min(300, len(df)), random_state=42)
-        fig = px.scatter(sample, x=x_col, y=y_col, size=s_col, color=c_col,
+        sample = df.sample(min(300, len(df)), random_state=42).copy()
+        sample[s_col] = sample[s_col].abs() + 1  # Fix negative/zero values
                          color_discrete_sequence=COLORS, opacity=0.7,
                          title=f"{x_col} vs {y_col} (size: {s_col})",
                          size_max=40)
