@@ -819,7 +819,7 @@ def render_multivariate(df):
         c_col = cat_cols[0] if cat_cols else None
         sample = df.sample(min(300, len(df)), random_state=42).copy()
         sample[s_col] = sample[s_col].abs() + 1
-        fig = px.scatter(sample, x=x_col, y=y_col, size=s_col, color=c_col,
+        fig = px.scatter(sample, x=x_col, y=y_col, size=s_col, color=c_col, color_discrete_sequence=COLORS, opacity=0.7,
                          title=f"{x_col} vs {y_col} (size: {s_col})",
                          size_max=40)
         fig.update_layout(
